@@ -31,8 +31,8 @@ app.use('/users', userRouter);
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.get("/test", (req, res) => {
-  res.send("🤗");
+  res.send("");
 });
 
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3000;
 app.listen(port, (err) => console.log(err || `listening on port ${port} 😎`));

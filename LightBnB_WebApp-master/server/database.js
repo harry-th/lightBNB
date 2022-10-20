@@ -1,14 +1,6 @@
 /* eslint-disable camelcase */
-const { Pool } = require('pg');
-const properties = require('./json/properties.json');
-// const users = require('./json/users.json');
-/// Users
-const pool = new Pool({
-  user: 'vagrant',
-  password: '123',
-  host: 'localhost',
-  database: 'lightbnb'
-});
+const db = require('./db/db');
+
 
 /**
  * Get a single user from the database given their email.
@@ -16,7 +8,7 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  return pool.query(`SELECT * FROM users WHERE email = $1`,
+  return db.query(`SELECT * FROM users WHERE email = $1`,
     [email]).then((res) => {
     return res.rows[0];
   }).catch((err) => {
@@ -31,7 +23,7 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return pool.query(`SELECT * FROM users WHERE id = $1`,
+  return db.query(`SELECT * FROM users WHERE id = $1`,
     [id]).then((res) => {
     return res.rows[0];
   }).catch((err) => {
@@ -48,7 +40,7 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  return pool.query(`INSERT INTO users (name, email, password)
+  return db.query(`INSERT INTO users (name, email, password)
   VALUES ($1, $2, $3) RETURNING *`,
   [user.name, user.email, user.password]).then((res) => {
     return res.rows;
@@ -66,7 +58,7 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return pool.query(`SELECT * FROM reservations
+  return db.query(`SELECT * FROM reservations
   join properties on property_id = properties.id
   where guest_id = $1 limit $2`,[guest_id, limit])
     .then((res) => {
@@ -123,7 +115,7 @@ const getAllProperties = function(options, limit = 10) {
     ORDER BY cost_per_night
     LIMIT 10;`;
     entireQuery = entireQuery.replace(/\s+/g,' ');
-    return pool.query(
+    return db.query(
       entireQuery,
       queries).then((res) => {
       return res.rows;
@@ -131,7 +123,7 @@ const getAllProperties = function(options, limit = 10) {
       console.log(err.message);
     });
   } else
-    return pool.query(
+    return db.query(
       `select * from properties limit $1`,
       [limit]).then((res) => {
       return res.rows;
@@ -161,7 +153,7 @@ const addProperty = function(property) {
   inputs = inputs.join(' ');
   inputs = inputs.slice(0, inputs.length - 1);
   console.log(inputs, query);
-  return pool.query(`INSERT INTO properties (title,
+  return db.query(`INSERT INTO properties (title,
     description,
     number_of_bedrooms,
     number_of_bathrooms,
