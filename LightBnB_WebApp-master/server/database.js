@@ -148,9 +148,35 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  let query = [];
+  let inputs = '$1';
+  let i = 2;
+  for (const pro in property) {
+    inputs += ', $' + i;
+    query.push(property[pro]);
+    i++;
+  }
+  inputs = inputs.split(' ');
+  inputs.pop();
+  inputs = inputs.join(' ');
+  inputs = inputs.slice(0, inputs.length - 1);
+  console.log(inputs, query);
+  return pool.query(`INSERT INTO properties (title,
+    description,
+    number_of_bedrooms,
+    number_of_bathrooms,
+    parking_spaces,
+    cost_per_night,
+    thumbnail_photo_url,
+    cover_photo_url,
+    street,
+    country,
+    city,
+    province,
+    post_code,
+    owner_id) values(${inputs})
+    RETURNING *`, query);
 };
 exports.addProperty = addProperty;
+
+
